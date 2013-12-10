@@ -233,8 +233,8 @@ namespace avdecc_lib
 
     int system_layer2_multithreaded_callback::init_poll_thread()
     {
-        poll_thread.kill_sem = CreateEvent(NULL, FALSE, FALSE, NULL);
-        poll_thread.handle = CreateThread(NULL, // Default security descriptor //poll_thread_handle = CreateThread(NULL, // Default security descriptor
+        poll_thread.kill_sem = CreateSemaphore(NULL, 0, 32767, NULL);
+        poll_thread.handle = CreateThread(NULL, // Default security descriptor
                                           0, // Default stack size
                                           proc_poll_thread, // Point to the start address of the thread
                                           this, // Data to be passed to the thread
@@ -262,7 +262,7 @@ namespace avdecc_lib
 
         dwEvent = WaitForMultipleObjects(poll_count, poll_events_array, FALSE, INFINITE);
 
-        switch (dwEvent)
+        switch(dwEvent)
         {
             case WAIT_OBJECT_0 + WPCAP_TIMEOUT:
                 break;
@@ -337,8 +337,8 @@ namespace avdecc_lib
         ReleaseSemaphore(poll_rx.queue_thread.kill_sem, 1, &previous);
         ReleaseSemaphore(poll_thread.kill_sem, 1, &previous);
 
-        while((WaitForSingleObject(poll_rx.queue_thread.handle, 0) != WAIT_OBJECT_0) ||
-              (WaitForSingleObject(poll_thread.handle, 0) != WAIT_OBJECT_0)) // Wait for thread termination
+        while((WaitForSingleObject(poll_rx.queue_thread.handle, 0) == WAIT_TIMEOUT) &&
+              (WaitForSingleObject(poll_thread.handle, 0) == WAIT_TIMEOUT)) // Wait for thread termination
         {
             Sleep(100);
         }
