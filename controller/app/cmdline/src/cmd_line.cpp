@@ -195,9 +195,9 @@ void cmd_line::cmd_line_help_init()
                                                   "\n\t d_d_i stands for destination descriptor index and is an integer."
                                                   "\n\t s_e_s_i stands for source End Station index and is an integer. " \
                                                   "\n\t s_d_i stands for source descriptor index and is an integer. " \
-                                                  "\n\t f stands for flags and is an integer.\n\n"
-                                                  "Valid flags are Class B, Fast Connect, Saved State, Streaming Wait,\n" \
-                                                  "Supports Encrypted, Encrypted PDU, and Talker Failed."
+                                                  "\n\t f stands for flags and is a string.\n\n"
+                                                  "Valid flags are class_b, fast_connect, saved_state, wait, supports_encrypted,\n" \
+                                                  " encrypted_pdu, and talker_failed."
                                                  ));
 
     cmd_line_help_vec.push_back(new cmd_line_help("disconnect",
@@ -317,17 +317,17 @@ void cmd_line::cmd_line_help_init()
 #if 0 
     cmd_line_help_vec.push_back(new cmd_line_help("set stream_info",
 
-    					      "set stream_info [d_t] [d_i] [f] [f_v]\n" \
-    					      "Send a SET_STREAM_INFO command to change a stream info field value to a new\n" \
-    					      "value using the current setting.\n\n"
-    					      "\nParameters" \
-    					      "\n\t d_t stands for descriptor type and is a string." \
-    					      "\n\t d_i stands for descriptor index and is an integer." \
-    					      "\n\t f stands for field and is a string." \
-    					      "\n\t f_v stands for field value and is an integer.\n\n" \
-    					      "Valid descriptor types are STREAM_INPUT and STREAM_OUTPUT.\n" \
-    					      "Valid fields are stream_id, msrp_accumulated_latency, and stream_dest_mac."
-    					      ));
+    					                          "set stream_info [d_t] [d_i] [f] [f_v]\n" \
+    					                          "Send a SET_STREAM_INFO command to change a stream info field value to a new\n" \
+    					                          "value using the current setting.\n\n"
+    					                          "\nParameters" \
+    					                          "\n\t d_t stands for descriptor type and is a string." \
+    					                          "\n\t d_i stands for descriptor index and is an integer." \
+    					                          "\n\t f stands for field and is a string." \
+    					                          "\n\t f_v stands for field value and is an integer.\n\n" \
+    					                          "Valid descriptor types are STREAM_INPUT and STREAM_OUTPUT.\n" \
+    					                          "Valid fields are stream_id, msrp_accumulated_latency, and stream_dest_mac."
+    					                          ));
 #endif
 
     cmd_line_help_vec.push_back(new cmd_line_help("get stream_info",
@@ -691,14 +691,23 @@ void cmd_line::print_desc_type_index_name_row(avdecc_lib::descriptor_base &desc,
     std::cout << std::setw(20) << utility->aem_desc_value_to_name(desc.descriptor_type());
     std::cout << "   "<<  std::setw(16) << std::dec << desc.descriptor_index();
 
-    uint8_t localized_desc_index = (desc.localized_description()) & 0x7; // The 3 bit index subfield defining the index of the string within the STRINGS descriptor
-    if(localized_desc_index < localized_string_max_index)
+    if((desc.descriptor_type() == avdecc_lib::AEM_DESC_STREAM_PORT_INPUT) ||
+       (desc.descriptor_type() == avdecc_lib::AEM_DESC_STREAM_PORT_OUTPUT) ||
+       (desc.descriptor_type() == avdecc_lib::AEM_DESC_AUDIO_MAP))
     {
-        std::cout << "   " << std::setw(20) << std::hex << strings.get_string_by_index(localized_desc_index) << std::endl;
+        std::cout << "   " << std::endl;
     }
     else
     {
-        std::cout << "   " << std::setw(20) << std::hex << desc.object_name() << std::endl;
+        uint8_t localized_desc_index = (desc.localized_description()) & 0x7; // The 3 bit index subfield defining the index of the string within the STRINGS descriptor
+        if(localized_desc_index < localized_string_max_index)
+        {
+            std::cout << "   " << std::setw(20) << std::hex << strings.get_string_by_index(localized_desc_index) << std::endl;
+        }
+        else
+        {
+            std::cout << "   " << std::setw(20) << std::hex << desc.object_name() << std::endl;
+        }
     }
 }
 
